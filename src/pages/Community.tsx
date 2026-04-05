@@ -381,11 +381,12 @@ export default function Community() {
       <section className="relative h-[300px] flex items-center justify-center overflow-hidden bg-slate-900">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1530866495547-08b978582107?auto=format&fit=crop&q=80&w=2000" 
+            src="https://images.unsplash.com/photo-1502680390469-be75c86b636f?auto=format&fit=crop&q=80&w=2000" 
             alt="Water sports community"
-            className="w-full h-full object-cover opacity-40"
+            className="w-full h-full object-cover opacity-50"
             referrerPolicy="no-referrer"
           />
+          <div className="absolute inset-0 bg-slate-900/20" />
         </div>
         <div className="container-custom relative z-10 text-center text-white">
           <motion.h1 
