@@ -381,8 +381,8 @@ export default function Community() {
       <section className="relative h-[300px] flex items-center justify-center overflow-hidden bg-slate-900">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1559136555-9303baea8ebd?auto=format&fit=crop&q=80&w=2000" 
-            alt="Community background"
+            src="https://images.unsplash.com/photo-1530866495547-08b978582107?auto=format&fit=crop&q=80&w=2000" 
+            alt="Water sports community"
             className="w-full h-full object-cover opacity-40"
             referrerPolicy="no-referrer"
           />
