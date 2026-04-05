@@ -1,0 +1,31 @@
+{
+  "entities": {
+    "CustomMou": {
+      "title": "Custom MOU Image",
+      "description": "Stores custom uploaded images for MOU partners.",
+      "type": "object",
+      "properties": {
+        "image": {
+          "type": "string",
+          "description": "Base64 encoded image data."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp of the last update."
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "UID of the user who uploaded the image."
+        }
+      },
+      "required": ["image", "updatedAt", "updatedBy"]
+    }
+  },
+  "firestore": {
+    "/customMous/{mouId}": {
+      "schema": "CustomMou",
+      "description": "Collection of custom MOU images, where mouId is noticeId_partnerName."
+    }
+  }
+}

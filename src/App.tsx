@@ -16,6 +16,8 @@ import Safety from './pages/Safety';
 import Community from './pages/Community';
 import Events from './pages/Events';
 
+import { LogoProvider } from './lib/LogoContext';
+
 // Scroll to top on route change
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -27,23 +29,25 @@ function ScrollToTop() {
 
 export default function App() {
   return (
-    <Router>
-      <ScrollToTop />
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/education" element={<Education />} />
-            <Route path="/lookup" element={<CertificationLookup />} />
-            <Route path="/safety" element={<Safety />} />
-            <Route path="/community" element={<Community />} />
-            <Route path="/events" element={<Events />} />
-          </Routes>
-        </main>
-        <Footer />
-      </div>
-    </Router>
+    <LogoProvider>
+      <Router>
+        <ScrollToTop />
+        <div className="min-h-screen flex flex-col">
+          <Header />
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/education" element={<Education />} />
+              <Route path="/lookup" element={<CertificationLookup />} />
+              <Route path="/safety" element={<Safety />} />
+              <Route path="/community" element={<Community />} />
+              <Route path="/events" element={<Events />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </Router>
+    </LogoProvider>
   );
 }

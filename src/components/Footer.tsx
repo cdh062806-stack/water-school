@@ -1,14 +1,28 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Waves, Mail, Phone, MapPin, Facebook, Instagram, Youtube } from 'lucide-react';
+import { useLogo } from '../lib/LogoContext';
 
 export default function Footer() {
+  const { logoUrl } = useLogo();
+  
   return (
     <footer className="bg-slate-900 text-slate-300 pt-16 pb-8">
       <div className="container-custom">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
           <div className="col-span-1 md:col-span-1">
-            <Link to="/" className="flex items-center mb-6">
+            <Link to="/" className="flex items-center gap-3 mb-6">
+              {logoUrl ? (
+                <img 
+                  src={logoUrl} 
+                  alt="대한워터스포츠협회 로고" 
+                  className="h-12 w-auto bg-white rounded-full p-0.5 object-contain" 
+                />
+              ) : (
+                <div className="p-1.5 rounded-lg bg-primary/20 text-primary">
+                  <Waves className="w-6 h-6" />
+                </div>
+              )}
               <span className="font-bold text-lg text-white tracking-tight whitespace-nowrap">
                 (사) 대한워터스포츠협회
               </span>

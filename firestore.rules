@@ -1,0 +1,103 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: customMous
+    // Document ID: noticeId_partnerName
+    // Fields:
+    //   - image: string (required, < 1MB) - Base64 encoded image data
+    //   - updatedAt: timestamp (required) - Last update time
+    //   - updatedBy: string (required) - UID of the uploader
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "cdh062806@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidCustomMou(data) {
+      return hasRequiredFields(['image', 'updatedAt', 'updatedBy']) &&
+             hasOnlyAllowedFields(['image', 'updatedAt', 'updatedBy']) &&
+             data.image is string && data.image.size() < 1000000 &&
+             data.updatedAt is timestamp &&
+             data.updatedBy is string && data.updatedBy == request.auth.uid;
+    }
+
+    function isValidCustomGallery(data) {
+      return hasRequiredFields(['image', 'updatedAt', 'updatedBy']) &&
+             hasOnlyAllowedFields(['image', 'updatedAt', 'updatedBy']) &&
+             data.image is string && data.image.size() < 1000000 &&
+             data.updatedAt is timestamp &&
+             data.updatedBy is string && data.updatedBy == request.auth.uid;
+    }
+
+    function isValidCustomQna(data) {
+      return hasRequiredFields(['question', 'answer', 'updatedAt', 'updatedBy']) &&
+             hasOnlyAllowedFields(['id', 'question', 'answer', 'updatedAt', 'updatedBy']) &&
+             data.question is string && data.question.size() < 1000 &&
+             data.answer is string && data.answer.size() < 5000 &&
+             data.updatedAt is timestamp &&
+             data.updatedBy is string && data.updatedBy == request.auth.uid;
+    }
+
+    function isValidCustomFreeBoard(data) {
+      return hasRequiredFields(['title', 'author', 'content', 'date', 'updatedAt', 'updatedBy']) &&
+             hasOnlyAllowedFields(['id', 'title', 'author', 'content', 'date', 'updatedAt', 'updatedBy']) &&
+             data.title is string && data.title.size() < 200 &&
+             data.author is string && data.author.size() < 50 &&
+             data.content is string && data.content.size() < 10000 &&
+             data.date is string &&
+             data.updatedAt is timestamp &&
+             data.updatedBy is string && data.updatedBy == request.auth.uid;
+    }
+
+    match /customMous/{mouId} {
+      allow read: if true; // Publicly readable
+      allow create, update: if isAuthenticated() && isValidCustomMou(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /customGallery/{galleryId} {
+      allow read: if true; // Publicly readable
+      allow create, update: if isAuthenticated() && isValidCustomGallery(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /customQna/{qnaId} {
+      allow read: if true; // Publicly readable
+      allow create, update: if isAuthenticated() && isValidCustomQna(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /customFreeBoard/{postId} {
+      allow read: if true; // Publicly readable
+      allow create, update: if isAuthenticated() && isValidCustomFreeBoard(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated() && request.auth.uid == userId;
+    }
+  }
+}
