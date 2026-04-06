@@ -13,10 +13,10 @@ export default function Home() {
           <img 
             src="https://images.unsplash.com/photo-1505118380757-91f5f5632de0?auto=format&fit=crop&q=80&w=2000" 
             alt="Crashing ocean waves"
-            className="w-full h-full object-cover opacity-90"
+            className="w-full h-full object-cover opacity-80"
             referrerPolicy="no-referrer"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/20 via-transparent to-slate-900/50" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-900/40 via-slate-900/20 to-slate-900/60" />
         </div>
 
         <div className="container-custom relative z-10 text-center text-white">
@@ -25,11 +25,11 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h1 className="text-5xl md:text-7xl font-black mb-8 leading-tight font-display">
+            <h1 className="text-5xl md:text-7xl font-bold mb-8 leading-tight font-soft drop-shadow-md">
               대한민국 워터스포츠<br />
               <span className="text-white">안전의 기준</span>
             </h1>
-            <p className="text-xl md:text-2xl text-white/80 max-w-2xl mx-auto mb-12 font-light">
+            <p className="text-xl md:text-2xl text-white max-w-2xl mx-auto mb-12 font-medium drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
               전문적인 교육과 체계적인 자격 시스템으로<br />
               대한민국 수상 레저의 미래를 열어갑니다.
             </p>
