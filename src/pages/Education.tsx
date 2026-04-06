@@ -85,7 +85,7 @@ const courses = [
     title: '생존수영지도사 자격증 과정',
     subtitle: '수상 안전사고 예방과 위기 대응 능력을 갖춘 전문 지도자를 양성합니다.',
     description: '생존수영지도사 과정은 수상 안전사고 예방과 위기 대응 능력을 갖춘 전문 지도자를 양성하기 위한 교육 프로그램으로 주무부처인 해양경찰청의 엄격한 기준을 준수하며,이론과 실습을 병행하여 실제 현장에서 즉시 활용 가능한 생존수영 교육 역량을 강화하는 데 목적이 있습니다.',
-    heroImage: 'https://images.unsplash.com/photo-1569154941061-e231b4725ef1?auto=format&fit=crop&q=80&w=2000',
+    heroImage: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=2000',
     overview: [
       { icon: LucideUsers, label: '교육 대상', value: '수상레저 종사자, 체육 지도자, 수영 강사 등' },
       { icon: Calendar, label: '교육 일정', value: '총 16~24시간 (이론 및 실습 병행)' },

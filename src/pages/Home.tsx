@@ -120,7 +120,7 @@ export default function Home() {
               className="group relative overflow-hidden rounded-3xl shadow-xl aspect-[4/3] md:aspect-video"
             >
               <img 
-                src="https://images.unsplash.com/photo-1569154941061-e231b4725ef1?auto=format&fit=crop&q=80&w=1200" 
+                src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&q=80&w=2000" 
                 alt="Survival Swimming Course"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                 referrerPolicy="no-referrer"
