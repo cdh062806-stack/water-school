@@ -1,20 +1,138 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { MapPin, Phone, Mail, Clock, Shield, Target, History, Users, Waves } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Shield, Target, History, Users, Waves, Edit2, Save, X, Upload } from 'lucide-react';
+import { db, auth } from '../firebase';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
+import { onAuthStateChanged } from 'firebase/auth';
+
+const DEFAULT_CONTENT = {
+  heroImage: "https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&q=80&w=2000",
+  heroTitle: "협회 소개",
+  heroDescription: "대한민국 워터스포츠의 안전과 미래를 선도하는\n품격 있는 리더십을 지향합니다.",
+  greetingHeading: "물 위에서의 즐거움,\n안전이 담보될 때\n비로소 완성됩니다.",
+  greetingParagraphs: [
+    "안녕하십니까? 대한워터스포츠협회 홈페이지를 방문해 주셔서 진심으로 감사드립니다.",
+    "우리 협회는 대한민국 수상 레저 문화의 건전한 발전과 안전 사고 예방을 목적으로 설립되었습니다. 해마다 증가하는 워터스포츠 인구에 발맞추어, 보다 체계적이고 전문적인 안전 교육의 필요성이 대두되고 있습니다.",
+    "우리는 단순한 기술 교육을 넘어, 생명을 존중하고 자연과 공존하는 워터스포츠 정신을 함양하는 데 주력하고 있습니다. 최고의 전문가들과 함께 안전한 수상 레저 환경을 조성하는 데 앞장서겠습니다."
+  ],
+  greetingImage: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&q=80&w=1000",
+  presidentName: "이연화"
+};
 
 export default function About() {
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [content, setContent] = useState(DEFAULT_CONTENT);
+  const [tempContent, setTempContent] = useState(DEFAULT_CONTENT);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      setIsAdmin(!!user);
+    });
+
+    const unsubscribeContent = onSnapshot(doc(db, 'settings', 'about'), (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data() as typeof DEFAULT_CONTENT;
+        setContent({ ...DEFAULT_CONTENT, ...data });
+        setTempContent({ ...DEFAULT_CONTENT, ...data });
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      unsubscribeAuth();
+      unsubscribeContent();
+    };
+  }, []);
+
+  const handleSave = async () => {
+    try {
+      await setDoc(doc(db, 'settings', 'about'), tempContent);
+      setIsEditing(false);
+      alert('저장되었습니다.');
+    } catch (error) {
+      console.error('Error saving content:', error);
+      alert('저장에 실패했습니다.');
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, field: 'heroImage' | 'greetingImage') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 1024 * 1024) { // 1MB limit for Firestore
+        alert('이미지 크기가 너무 큽니다. 1MB 이하의 이미지를 사용해주세요.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setTempContent({ ...tempContent, [field]: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="pt-20 min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="pt-20">
-      {/* Sub Visual - More subtle and sensible */}
+      {/* Admin Controls */}
+      {isAdmin && (
+        <div className="fixed bottom-10 right-10 z-50 flex gap-4">
+          {isEditing ? (
+            <>
+              <button 
+                onClick={handleSave}
+                className="bg-emerald-600 text-white p-4 rounded-full shadow-2xl hover:bg-emerald-700 transition-colors flex items-center gap-2 px-6"
+              >
+                <Save size={24} /> 저장하기
+              </button>
+              <button 
+                onClick={() => {
+                  setIsEditing(false);
+                  setTempContent(content);
+                }}
+                className="bg-red-600 text-white p-4 rounded-full shadow-2xl hover:bg-red-700 transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </>
+          ) : (
+            <button 
+              onClick={() => setIsEditing(true)}
+              className="bg-primary text-white p-4 rounded-full shadow-2xl hover:bg-primary/90 transition-colors flex items-center gap-2 px-6"
+            >
+              <Edit2 size={24} /> 내용 수정하기
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Sub Visual */}
       <section className="relative h-[460px] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img 
-            src="https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&q=80&w=2000" 
-            alt="Subtle water landscape"
+            src={isEditing ? tempContent.heroImage : content.heroImage} 
+            alt="Hero background"
             className="w-full h-full object-cover opacity-70"
             referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-slate-900/5 to-slate-900/40" />
+          {isEditing && (
+            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+              <label className="cursor-pointer bg-white/20 hover:bg-white/40 p-6 rounded-3xl border-2 border-dashed border-white/60 text-white flex flex-col items-center gap-3 transition-all">
+                <Upload size={32} />
+                <span className="font-bold">메인 이미지 변경</span>
+                <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'heroImage')} />
+              </label>
+            </div>
+          )}
         </div>
         <div className="container-custom relative z-10 text-center">
           <motion.div
@@ -23,19 +141,35 @@ export default function About() {
             transition={{ duration: 1 }}
           >
             <span className="text-white/80 text-sm font-bold tracking-[0.3em] uppercase mb-4 block">About Association</span>
-            <h1 className="text-4xl md:text-7xl font-light text-white mb-6 tracking-tight">
-              협회 소개
-            </h1>
+            {isEditing ? (
+              <input 
+                value={tempContent.heroTitle}
+                onChange={(e) => setTempContent({...tempContent, heroTitle: e.target.value})}
+                className="text-4xl md:text-7xl font-light text-white mb-6 tracking-tight bg-white/10 border-b border-white/40 focus:outline-none w-full text-center"
+              />
+            ) : (
+              <h1 className="text-4xl md:text-7xl font-light text-white mb-6 tracking-tight">
+                {content.heroTitle}
+              </h1>
+            )}
             <div className="w-12 h-px bg-white/40 mx-auto mb-6" />
-            <p className="text-lg md:text-xl text-white/90 font-light max-w-2xl mx-auto leading-relaxed">
-              대한민국 워터스포츠의 안전과 미래를 선도하는<br />
-              품격 있는 리더십을 지향합니다.
-            </p>
+            {isEditing ? (
+              <textarea 
+                value={tempContent.heroDescription}
+                onChange={(e) => setTempContent({...tempContent, heroDescription: e.target.value})}
+                rows={2}
+                className="text-lg md:text-xl text-white/90 font-light max-w-2xl mx-auto leading-relaxed bg-white/10 border border-white/20 rounded-xl p-4 focus:outline-none w-full text-center scrollbar-hide resize-none"
+              />
+            ) : (
+              <p className="text-lg md:text-xl text-white/90 font-light max-w-2xl mx-auto leading-relaxed whitespace-pre-line">
+                {content.heroDescription}
+              </p>
+            )}
           </motion.div>
         </div>
       </section>
 
-      {/* Greetings - Refined and elegant */}
+      {/* Greetings */}
       <section className="py-32 bg-white">
         <div className="container-custom">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
@@ -46,23 +180,51 @@ export default function About() {
               transition={{ duration: 0.8 }}
             >
               <div className="text-primary/60 font-medium mb-6 uppercase tracking-[0.2em] text-sm">Greetings</div>
-              <h2 className="text-4xl md:text-5xl font-light mb-12 leading-[1.2] text-slate-800">
-                물 위에서의 즐거움,<br />
-                <span className="text-primary font-medium">안전</span>이 담보될 때<br />
-                비로소 완성됩니다.
-              </h2>
+              {isEditing ? (
+                <textarea 
+                  value={tempContent.greetingHeading}
+                  onChange={(e) => setTempContent({...tempContent, greetingHeading: e.target.value})}
+                  rows={3}
+                  className="text-4xl md:text-5xl font-light mb-12 leading-[1.2] text-slate-800 bg-slate-50 border border-slate-200 rounded-2xl p-6 focus:outline-none w-full resize-none"
+                />
+              ) : (
+                <h2 className="text-4xl md:text-5xl font-light mb-12 leading-[1.2] text-slate-800 whitespace-pre-line">
+                  {content.greetingHeading.split('\n').map((line, i) => (
+                    <span key={i}>
+                      {line.includes('안전') ? (
+                        <>
+                          <span className="text-primary font-medium">{line.replace('안전', '')}안전</span>
+                        </>
+                      ) : line}
+                      <br />
+                    </span>
+                  ))}
+                  {/* Note: Simple replacement for '안전' keyword to keep original styling if possible, otherwise just text */}
+                </h2>
+              )}
               <div className="space-y-8 text-slate-500 leading-relaxed text-lg font-light">
-                <p>
-                  안녕하십니까? 대한워터스포츠협회 홈페이지를 방문해 주셔서 진심으로 감사드립니다.
-                </p>
-                <p>
-                  우리 협회는 대한민국 수상 레저 문화의 건전한 발전과 안전 사고 예방을 목적으로 설립되었습니다. 
-                  해마다 증가하는 워터스포츠 인구에 발맞추어, 보다 체계적이고 전문적인 안전 교육의 필요성이 대두되고 있습니다.
-                </p>
-                <p>
-                  우리는 단순한 기술 교육을 넘어, 생명을 존중하고 자연과 공존하는 워터스포츠 정신을 함양하는 데 주력하고 있습니다. 
-                  최고의 전문가들과 함께 안전한 수상 레저 환경을 조성하는 데 앞장서겠습니다.
-                </p>
+                {isEditing ? (
+                  <div className="space-y-4">
+                    {tempContent.greetingParagraphs.map((p, i) => (
+                      <textarea 
+                        key={i}
+                        value={p}
+                        onChange={(e) => {
+                          const newPars = [...tempContent.greetingParagraphs];
+                          newPars[i] = e.target.value;
+                          setTempContent({...tempContent, greetingParagraphs: newPars});
+                        }}
+                        rows={3}
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl p-4 focus:outline-none resize-none"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  content.greetingParagraphs.map((p, i) => (
+                    <p key={i}>{p}</p>
+                  ))
+                )}
+                
                 <div className="pt-8 border-t border-slate-100">
                   <p className="text-slate-400 text-sm mb-2 italic">President of KWSA</p>
                   <div className="inline-block">
@@ -71,7 +233,15 @@ export default function About() {
                         <span className="text-xs font-medium mr-1 opacity-60">사단법인</span> 대한워터스포츠협회
                       </span>
                       <span className="block md:inline md:ml-3 text-right">
-                        회장 <span className="font-medium ml-1">이연화</span>
+                        회장 {isEditing ? (
+                          <input 
+                            value={tempContent.presidentName}
+                            onChange={(e) => setTempContent({...tempContent, presidentName: e.target.value})}
+                            className="font-medium ml-1 bg-slate-50 border-b border-primary/40 focus:outline-none w-24"
+                          />
+                        ) : (
+                          <span className="font-medium ml-1">{content.presidentName}</span>
+                        )}
                       </span>
                     </p>
                   </div>
@@ -85,13 +255,22 @@ export default function About() {
               transition={{ duration: 1 }}
               className="relative"
             >
-              <div className="aspect-[4/5] rounded-[40px] overflow-hidden shadow-2xl shadow-slate-900/20">
+              <div className="aspect-[4/5] rounded-[40px] overflow-hidden shadow-2xl shadow-slate-900/20 relative group">
                 <img 
-                  src="https://images.unsplash.com/photo-1517701604599-bb29b565090c?auto=format&fit=crop&q=80&w=1000" 
-                  alt="Dramatic minimalist coffee"
+                  src={isEditing ? tempContent.greetingImage : content.greetingImage} 
+                  alt="Greeting background"
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
                 />
+                {isEditing && (
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                    <label className="cursor-pointer bg-white/20 hover:bg-white/40 p-6 rounded-3xl border-2 border-dashed border-white/60 text-white flex flex-col items-center gap-3 transition-all">
+                      <Upload size={32} />
+                      <span className="font-bold">인사말 이미지 변경</span>
+                      <input type="file" className="hidden" accept="image/*" onChange={(e) => handleImageUpload(e, 'greetingImage')} />
+                    </label>
+                  </div>
+                )}
               </div>
               <div className="absolute -bottom-10 -right-10 w-64 h-64 bg-primary/5 rounded-full -z-10 blur-3xl" />
             </motion.div>
